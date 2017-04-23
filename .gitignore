@@ -14,10 +14,11 @@ opencv/
 convnet/
 decaf/
 submission/
-cfg/
+VOC_data/
 darknet
 .fuse*
 *.weights
+backup/
 
 # OS Generated #
 .DS_Store*

@@ -651,21 +651,23 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 
         float *X = sized.data;
         time=clock();
-        float *predictions = network_predict(net, X); //r
+        network_predict(net, X); //r
+        //float *predictions = network_predict(net, X); //r
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         
-        //get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh, 0);   //r
-        printf("w:%d, h:%d, n:%d, whn:%d \n",l.w, l.h, l.n, l.w*l.h*l.n ) ;
+        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh, 0);   //r
+        printf("w:%d, h:%d, n:%d, whn:%d, classes:%d \n",l.w, l.h, l.n, l.w*l.h*l.n , l.classes) ;
 
         //printf("side:%d, n:%d, whn:%d, thresh: %f \n",l.side, l.n, l.side*l.side*l.n, thresh) ;
         printf("net_n:%d\n",net.n-1);
-        get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
+        //get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
         //convert_yolo_detections(predictions, l.classes, l.n, l.sqrt, l.side, 1, 1, thresh, probs, boxes, 0);
-        if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+        //if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+        if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         //else if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         
-        draw_detections(sized, l.side*l.side*l.n, thresh, boxes, probs, names, alphabet, l.classes);
-        //draw_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
+        //draw_detections(sized, l.side*l.side*l.n, thresh, boxes, probs, names, alphabet, l.classes);
+        draw_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
         if(outfile){
             save_image(sized, outfile);
         }

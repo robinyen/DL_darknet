@@ -60,7 +60,12 @@ void forward_detection_layer(const detection_layer l, network net)
                 int offset = i*l.classes;
                 softmax(l.output + index + offset, l.classes, 1, 1,
                         l.output + index + offset);
+                //softmax_array(l.output + index + offset, l.classes, 1,
+                //        l.output + index + offset);
+
             }
+            int offset = locations*l.classes;
+            activate_array(l.output + index + offset, locations*l.n*(1+l.coords), LOGISTIC);
         }
     }
     if(net.train){
@@ -90,6 +95,7 @@ void forward_detection_layer(const detection_layer l, network net)
                 float best_rmse = 20;
 
                 if (!is_obj){
+                    //printf("Not object");
                     continue;
                 }
 
@@ -139,9 +145,9 @@ void forward_detection_layer(const detection_layer l, network net)
                         best_index = 0;
                     }
                 }
-                if(l.random && *(net.seen) < 64000){
-                    best_index = rand()%l.n;
-                }
+             //   if(l.random && *(net.seen) < 64000){
+             //       best_index = rand()%l.n;
+             //   }
 
                 int box_index = index + locations*(l.classes + l.n) + (i*l.n + best_index) * l.coords;
                 int tbox_index = truth_index + 1 + l.classes;
@@ -179,9 +185,16 @@ void forward_detection_layer(const detection_layer l, network net)
                 avg_iou += iou;
                 ++count;
             }
+        
+            //r
+            if(l.softmax){
+                gradient_array(l.output + index + locations*l.classes, locations*l.n*(1+l.coords), 
+                        LOGISTIC, l.delta + index + locations*l.classes);
+            }
+        
         }
 
-        if(0){
+        if(0){   //r
             float *costs = calloc(l.batch*locations*l.n, sizeof(float));
             for (b = 0; b < l.batch; ++b) {
                 int index = b*l.inputs;
@@ -208,7 +221,7 @@ void forward_detection_layer(const detection_layer l, network net)
         }
 
 
-        *(l.cost) = pow(mag_array(l.delta, l.outputs * l.batch), 2);
+        //*(l.cost) = pow(mag_array(l.delta, l.outputs * l.batch), 2);
 
 
         printf("Detection Avg IOU: %f, Pos Cat: %f, All Cat: %f, Pos Obj: %f, Any Obj: %f, count: %d\n", avg_iou/count, avg_cat/count, avg_allcat/(count*l.classes), avg_obj/count, avg_anyobj/(l.batch*locations*l.n), count);
