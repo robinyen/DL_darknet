@@ -1,0 +1,6 @@
+classes= 20
+train  = /home/paperspace/Project/yolo/darknet/VOC_data/2007_train.txt
+valid  = /home/paperspace/Project/yolo/darknet/VOC_data/2007_test.txt
+names = data/voc.names
+backup = backup
+
