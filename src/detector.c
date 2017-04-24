@@ -10,35 +10,6 @@
 
 static int coco_ids[] = {1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,31,32,33,34,35,36,37,38,39,40,41,42,43,44,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,67,70,72,73,74,75,76,77,78,79,80,81,82,84,85,86,87,88,89,90};
 
-void convert_yolo_detections(float *predictions, int classes, int num, int square, int side, int w, int h, float thresh, float **probs, box *boxes, int only_objectness)
-{
-    //convert_yolo_detections(predictions, 20, 2, 1, 7, 1, 1, 0.2, probs, boxes, 0);
-    int i,j,n;
-    //int per_cell = 5*num+classes;
-    for (i = 0; i < side*side; ++i){
-        int row = i / side;
-        int col = i % side;
-        for(n = 0; n < num; ++n){
-            int index = i*num + n;
-            int p_index = side*side*classes + i*num + n;
-            float scale = predictions[p_index];
-            int box_index = side*side*(classes + num) + (i*num + n)*4;
-            boxes[index].x = (predictions[box_index + 0] + col) / side * w;
-            boxes[index].y = (predictions[box_index + 1] + row) / side * h;
-            boxes[index].w = pow(predictions[box_index + 2], (square?2:1)) * w;
-            boxes[index].h = pow(predictions[box_index + 3], (square?2:1)) * h;
-            for(j = 0; j < classes; ++j){
-                int class_index = i*classes;
-                float prob = scale*predictions[class_index+j];
-                probs[index][j] = (prob > thresh) ? prob : 0;
-            }
-            if(only_objectness){
-                probs[index][0] = scale;
-            }
-        }
-    }
-}
-
 void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, int ngpus, int clear)
 {
     list *options = read_data_cfg(datacfg);
@@ -159,6 +130,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
         float loss = 0;
 #ifdef GPU
         if(ngpus == 1){
+            //printf("---------1-----GPU\n");
             loss = train_network(net, train);
         } else {
             loss = train_networks(nets, ngpus, train, 4);
@@ -170,8 +142,10 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
         avg_loss = avg_loss*.9 + loss*.1;
 
         i = get_current_batch(net);
-        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
-        if(i%1000==0 || (i < 1000 && i%100 == 0)){
+        printf("%d: Loss:%f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        //printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
+
+        if((i > 999 && i%400 == 0) || (i < 1000 && i%100 == 0)){
 #ifdef GPU
             if(ngpus != 1) sync_nets(nets, ngpus, 0);
 #endif
@@ -434,18 +408,21 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     int coco = 0;
     int imagenet = 0;
     if(0==strcmp(type, "coco")){
+        printf("coco\n");
         if(!outfile) outfile = "coco_results";
         snprintf(buff, 1024, "%s/%s.json", prefix, outfile);
         fp = fopen(buff, "w");
         fprintf(fp, "[\n");
         coco = 1;
     } else if(0==strcmp(type, "imagenet")){
+        printf("imagenet\n");
         if(!outfile) outfile = "imagenet-detection";
         snprintf(buff, 1024, "%s/%s.txt", prefix, outfile);
         fp = fopen(buff, "w");
         imagenet = 1;
         classes = 200;
     } else {
+        printf("comp4_det_test\n");
         if(!outfile) outfile = "comp4_det_test_";
         fps = calloc(classes, sizeof(FILE *));
         for(j = 0; j < classes; ++j){
@@ -541,7 +518,8 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
-    list *plist = get_paths("data/voc.2007.test");
+    //list *plist = get_paths("data/voc.2007.test");
+    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/VOC_data/2007_train.txt");
     char **paths = (char **)list_to_array(plist);
 
     layer l = net.layers[net.n-1];
@@ -651,22 +629,11 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 
         float *X = sized.data;
         time=clock();
-        network_predict(net, X); //r
-        //float *predictions = network_predict(net, X); //r
+        network_predict(net, X);
         printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
-        
-        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh, 0);   //r
-        printf("w:%d, h:%d, n:%d, whn:%d, classes:%d \n",l.w, l.h, l.n, l.w*l.h*l.n , l.classes) ;
-
-        //printf("side:%d, n:%d, whn:%d, thresh: %f \n",l.side, l.n, l.side*l.side*l.n, thresh) ;
-        printf("net_n:%d\n",net.n-1);
-        //get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
-        //convert_yolo_detections(predictions, l.classes, l.n, l.sqrt, l.side, 1, 1, thresh, probs, boxes, 0);
-        //if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
-        if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh, 0);
+        if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         //else if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
-        
-        //draw_detections(sized, l.side*l.side*l.n, thresh, boxes, probs, names, alphabet, l.classes);
         draw_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
         if(outfile){
             save_image(sized, outfile);

@@ -10,8 +10,8 @@ char *voc_names[] = {"aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "c
 
 void train_yolo(char *cfgfile, char *weightfile)
 {
-    char *train_images = "/data/voc/train.txt";
-    char *backup_directory = "/home/pjreddie/backup/";
+    char *train_images = "/home/paperspace/Project/yolo/darknet/VOC_data/2007_train.txt";
+    char *backup_directory = "/home/paperspace/Project/yolo/darknet/backup/yolov1/";
     srand(time(0));
     char *base = basecfg(cfgfile);
     printf("%s\n", base);

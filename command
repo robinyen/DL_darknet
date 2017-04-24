@@ -3,6 +3,10 @@
 ./darknet detector test cfg/voc.data cfg/yolo-voc.cfg yolo-voc.weights data/person.jpg
 
 
+./darknet detector test cfg/my-voc.data cfg/yolo-voc.cfg backup/yolo-voc_1000.weights data/eagle.jpg
+
+
+
 ./darknet detector train cfg/my-voc.data cfg/yolov1/yolo.cfg extraction.conv.weights 
 
 
@@ -10,4 +14,13 @@
 
 
 anchors =  1, 2, 3, 4, 5, 6, 1, 8, 9, 10
+
+
+./darknet yolo test cfg/yolo-small.cfg yolo-small.weights
+
+
+
+# Recall
+	
+	./darknet detector recall  cfg/my-voc.data cfg/yolo-voc.cfg yolo-voc.weights 
 
