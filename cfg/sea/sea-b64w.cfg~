@@ -17,7 +17,7 @@ hue=.1
 
 learning_rate=0.001
 burn_in=1000
-max_batches = 8000
+max_batches = 4401
 policy=steps
 steps=2000,3000
 scales=.1,.1
@@ -239,7 +239,7 @@ activation=linear
 
 
 [region]
-anchors =  0.35, 0.555, 0.675, 0.6991, 1.0, 1.01, 2.0, 2.01, 3.19275, 4.00944
+anchors =  1.55, 2.09, 0.675, 0.6991, 1.0, 1.01, 2.0, 2.01, 3.19275, 4.00944
 bias_match=1
 classes=5
 coords=4
