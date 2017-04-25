@@ -11,7 +11,7 @@
 
 #./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg
 
-#./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64-large.cfg backup/sea-b64_100.weights
+./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights
 
 #
 
