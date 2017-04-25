@@ -8,6 +8,7 @@
 #include "option_list.h"
 #include "blas.h"
 
+
 static int coco_ids[] = {1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,31,32,33,34,35,36,37,38,39,40,41,42,43,44,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,67,70,72,73,74,75,76,77,78,79,80,81,82,84,85,86,87,88,89,90};
 
 void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, int ngpus, int clear)
@@ -74,6 +75,33 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
     pthread_t load_thread = load_data(args);
     clock_t time;
     int count = 0;
+
+    //r 
+    /*
+    FILE *fp_log = fopen('log_training.txt', "w");
+    if (fp_log == NULL) {
+        printf("Error");
+    }
+    
+    fprintf(fp_log,"test");
+    fclose(fp_log);
+    */
+  /*
+    FILE *fp2;
+    fp2 = fopen( "file.txt" , "w" );
+    if (fp2 == NULL) {
+        printf("Error");
+    } 
+
+    fstream log;
+    log.open("logfile.txt",ofstream::app);
+    //std::stringstream stream;
+    char str[256]; 
+     sprintf(str,"FUCK");
+    //std::ofstream outFile("Test");
+    log<<"Test"<<endl;
+*/
+
     //while(i*imgs < N*120){
     while(get_current_batch(net) < net.max_batches){
         if(l.random && count++%10 == 0){
@@ -142,7 +170,20 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
         avg_loss = avg_loss*.9 + loss*.1;
 
         i = get_current_batch(net);
-        printf("%d: Loss:%f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        //printf("%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        printf("%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        //fprintf(fp_log, "asdf");//"%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+
+/*
+char str[256];  
+        sprintf(str, "%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);//,  loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        //fwrite(str , sizeof(str[0]) , sizeof(str)/sizeof(str[0]) , fp2 );
+        fprintf(fp2,"%s",str);
+        printf("%s",str);
+*/
+        
+
+
         //printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
 
         if((i > 999 && i%400 == 0) || (i < 1000 && i%100 == 0)){
@@ -158,6 +199,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
 #ifdef GPU
     if(ngpus != 1) sync_nets(nets, ngpus, 0);
 #endif
+    //fclose(fp2);
     char buff[256];
     sprintf(buff, "%s/%s_final.weights", backup_directory, base);
     save_weights(net, buff);
@@ -508,7 +550,7 @@ void validate_detector(char *datacfg, char *cfgfile, char *weightfile, char *out
     fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
 }
 
-void validate_detector_recall(char *cfgfile, char *weightfile)
+void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
 {
     network net = parse_network_cfg(cfgfile);
     if(weightfile){
@@ -518,8 +560,13 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
+//r
+    FILE *fp2 ;
+    //fp2 = fopen("/home/paperspace/Project/yolo/darknet/log_recall.txt", "w");
+    fp2 = fopen(outfile, "w");
+
     //list *plist = get_paths("data/voc.2007.test");
-    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/VOC_data/2007_train.txt");
+    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/Recall_list.txt");
     char **paths = (char **)list_to_array(plist);
 
     layer l = net.layers[net.n-1];
@@ -533,7 +580,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
     int m = plist->size;
     int i=0;
 
-    float thresh = .001;
+    float thresh = 0.24;//.001;
     float iou_thresh = .5;
     float nms = .4;
 
@@ -581,10 +628,16 @@ void validate_detector_recall(char *cfgfile, char *weightfile)
         }
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+
+        fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+
+
         free(id);
         free_image(orig);
         free_image(sized);
     }
+
+    fclose(fp2);
 }
 
 void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile)
@@ -700,7 +753,7 @@ void run_detector(int argc, char **argv)
     else if(0==strcmp(argv[2], "train")) train_detector(datacfg, cfg, weights, gpus, ngpus, clear);
     else if(0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
     else if(0==strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
-    else if(0==strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights);
+    else if(0==strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights, outfile);
     else if(0==strcmp(argv[2], "demo")) {
         list *options = read_data_cfg(datacfg);
         int classes = option_find_int(options, "classes", 20);
