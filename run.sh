@@ -18,15 +18,15 @@
 ##----------------------------Train 32b 64b on New from scratch
 
 
-#./darknet detector train cfg/sea/sea-b32w.data  cfg/sea/sea-b32w.cfg
-#./darknet detector train cfg/sea/sea-b64w.data  cfg/sea/sea-b64w.cfg
+./darknet detector train cfg/sea/sea-b64w.data  cfg/sea/sea-b64w.cfg
+./darknet detector train cfg/sea/sea-b32w.data  cfg/sea/sea-b32w.cfg
 
 
 
 
 #test  ------------------------------------
 
-./darknet detector test cfg/sea/sea-b64w.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights 
+#./darknet detector test cfg/sea/sea-b64w.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights 
 
 
 
