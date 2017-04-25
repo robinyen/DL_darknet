@@ -1,0 +1,6 @@
+classes= 5
+train  = /home/paperspace/Project/Sealion/Train/Basic_64_Black/Train.txt
+valid  = /home/paperspace/Project/Sealion/Test/Basic_64_Black/Test.txt
+names = /home/paperspace/Project/Sealion/sea.names
+backup = backup
+
