@@ -566,7 +566,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     fp2 = fopen(outfile, "w");
 
     //list *plist = get_paths("data/voc.2007.test");
-    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/Recall_list.txt");
+    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/Recall.txt");
     char **paths = (char **)list_to_array(plist);
 
     layer l = net.layers[net.n-1];

@@ -44,7 +44,6 @@
 ./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights -out log_recall_b64_2000.txt
 ./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_3200.weights -out log_recall_b64_3000.txt
 ./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_4000.weights -out log_recall_b64_4000.txt
-./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_final.weights -out log_recall_b64_final.txt
 
 ./darknet detector recall cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_2000.weights -out log_recall_b32_2000.txt
 ./darknet detector recall cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_3200.weights -out log_recall_b32_3000.txt
