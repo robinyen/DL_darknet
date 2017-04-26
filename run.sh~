@@ -11,14 +11,27 @@
 
 #./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg
 
+<<<<<<< HEAD
 #./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights
+=======
+
+
+#./darknet detector train cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights
+
+#./darknet detector train cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_4400.weights
+>>>>>>> 63d2895d711d6e4ab253422b686a02358d4cd331
 
 #
 
 ##----------------------------Train 32b 64b on New from scratch
 
 
+<<<<<<< HEAD
 ./darknet detector train cfg/sea/sea-b32w.data  cfg/sea/sea-b32w.cfg
+=======
+#./darknet detector train cfg/sea/sea-b64w.data  cfg/sea/sea-b64w.cfg
+#./darknet detector train cfg/sea/sea-b32w.data  cfg/sea/sea-b32w.cfg
+>>>>>>> 63d2895d711d6e4ab253422b686a02358d4cd331
 
 
 ./darknet detector train cfg/sea/sea-a32w.data  cfg/sea/sea-a32w.cfg
@@ -45,6 +58,21 @@
 #./darknet detector recall cfg/sea/Basic_64.data  cfg/sea/sea-b64.cfg backup/sea-b64_900.weights -out log_recall_b64_900.txt
 
 
+<<<<<<< HEAD
 # valid
 
-./darknet detector valid cfg/sea/sea-a32w.data  cfg/sea/sea-a32w.cfg backup/sea-b32w_4400.weights 
+./darknet detector valid cfg/sea/sea-a32w.data  cfg/sea/sea-a32w.cfg backup/sea-a2w_4400.weights 
+=======
+./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_2000.weights -out log_recall_b64_2000.txt
+./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_3200.weights -out log_recall_b64_3000.txt
+./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_4000.weights -out log_recall_b64_4000.txt
+./darknet detector recall cfg/sea/sea-b64.data  cfg/sea/sea-b64.cfg backup/sea-b64_final.weights -out log_recall_b64_final.txt
+
+./darknet detector recall cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_2000.weights -out log_recall_b32_2000.txt
+./darknet detector recall cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_3200.weights -out log_recall_b32_3000.txt
+./darknet detector recall cfg/sea/sea-b32.data  cfg/sea/sea-b32.cfg backup/sea-b32_4000.weights -out log_recall_b32_4000.txt
+
+
+
+
+>>>>>>> 63d2895d711d6e4ab253422b686a02358d4cd331
