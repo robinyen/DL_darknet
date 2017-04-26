@@ -19,7 +19,7 @@ darknet
 .fuse*
 *.weights
 backup/
-#run.sh
+run.sh
 
 # OS Generated #
 .DS_Store*
