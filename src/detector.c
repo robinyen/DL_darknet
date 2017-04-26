@@ -585,6 +585,16 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     float nms = .4;
 
     int total = 0;
+    
+    int total_c0 = 0;
+    int total_c1 = 0;
+    int total_c2 = 0;
+    int total_c3 = 0;
+    int total_c4 = 0;   
+    int class_id = 0;
+
+    int correct_class[5] = {0,0,0,0,0}; 
+
     int correct = 0;
     int proposals = 0;
     float avg_iou = 0;
@@ -612,6 +622,31 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
             }
         }
         for (j = 0; j < num_labels; ++j) {
+            
+            class_id = truth[j].id;
+            switch(class_id) {
+                case 0:
+                    total_c0++;
+                    break;
+                case 1:
+                    total_c1++;
+                    break;
+                case 2:
+                    total_c2++;
+                    break;
+                case 3:
+                    total_c3++;
+                    break;
+                case 4:
+                    total_c4++;
+                    break;    
+                default :
+                    break;
+            }
+            
+            
+            
+            
             ++total;
             box t = {truth[j].x, truth[j].y, truth[j].w, truth[j].h};
             float best_iou = 0;
@@ -624,12 +659,37 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
             avg_iou += best_iou;
             if(best_iou > iou_thresh){
                 ++correct;
+
+                switch(class_id) {
+                    case 0:
+                        correct_class[0]++;
+                        break;
+                    case 1:
+                        correct_class[1]++;
+                        break;
+                    case 2:
+                        correct_class[2]++;
+                        break;
+                    case 3:
+                        correct_class[3]++;
+                        break;
+                    case 4:
+                        correct_class[4]++;
+                        break;    
+                    default :
+                        break;
+                }
+
             }
         }
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
 
-        fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+        fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\t", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+        fprintf(fp2, "\tC0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n",  (float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
+        
+
+        
 
 
         free(id);
