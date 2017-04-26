@@ -1,6 +1,6 @@
 classes= 5
 train  = /home/paperspace/Project/Sealion/Train/Advance_32_Whole/Train.txt
-valid  = /home/paperspace/Project/Sealion/Test/Basic_32_Whole/Test.txt
+valid  = /home/paperspace/Project/Sealion/Test/Advance_32_Whole/Test.txt
 names = /home/paperspace/Project/Sealion/sea.names
 backup = backup
 

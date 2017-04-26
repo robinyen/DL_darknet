@@ -1,8 +1,2 @@
-    0     4    20	RPs/Img: 19.00	IOU: 30.76%	Recall:20.00%
-    1     6    38	RPs/Img: 19.50	IOU: 35.40%	Recall:15.79%
-    2    10    54	RPs/Img: 18.67	IOU: 37.53%	Recall:18.52%
-    3    16    71	RPs/Img: 20.50	IOU: 38.50%	Recall:22.54%
-    4    19    74	RPs/Img: 17.00	IOU: 39.79%	Recall:25.68%
-    5    21   100	RPs/Img: 19.17	IOU: 39.18%	Recall:21.00%
-    6    24   114	RPs/Img: 19.14	IOU: 39.96%	Recall:21.05%
-    7    29   132	RPs/Img: 19.38	IOU: 40.12%	Recall:21.97%
+    0     0     0	RPs/Img: 0.00	IOU: -nan%	Recall:-nan%
+    1     0     0	RPs/Img: 0.00	IOU: -nan%	Recall:-nan%
