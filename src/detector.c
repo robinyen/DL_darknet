@@ -598,6 +598,8 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     int correct = 0;
     int proposals = 0;
     float avg_iou = 0;
+    float avg_RMSE = 0;
+    float num_img = 0;
 
     for(i = 0; i < m; ++i){
         char *path = paths[i];
@@ -621,24 +623,34 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
                 ++proposals;
             }
         }
+
+        float current_correct_class[5] = {0,0,0,0,0};
+        float current_total_class[5] = {0,0,0,0,0};
+
+
         for (j = 0; j < num_labels; ++j) {
             
             class_id = truth[j].id;
             switch(class_id) {
                 case 0:
                     total_c0++;
+                    current_total_class[0]++;
                     break;
                 case 1:
                     total_c1++;
+                    current_total_class[1]++;
                     break;
                 case 2:
                     total_c2++;
+                    current_total_class[2]++;
                     break;
                 case 3:
                     total_c3++;
+                    current_total_class[3]++;
                     break;
                 case 4:
                     total_c4++;
+                    current_total_class[4]++;
                     break;    
                 default :
                     break;
@@ -663,18 +675,23 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
                 switch(class_id) {
                     case 0:
                         correct_class[0]++;
+                        current_correct_class[0]++;
                         break;
                     case 1:
                         correct_class[1]++;
+                        current_correct_class[1]++;
                         break;
                     case 2:
                         correct_class[2]++;
+                        current_correct_class[2]++;
                         break;
                     case 3:
                         correct_class[3]++;
+                        current_correct_class[3]++;
                         break;
                     case 4:
                         correct_class[4]++;
+                        current_correct_class[4]++;
                         break;    
                     default :
                         break;
@@ -682,11 +699,24 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
 
             }
         }
+        float RMSE=0;
+        int idx_RMSE;
+        if(num_labels >0){  
+            for(idx_RMSE=0; idx_RMSE<5; idx_RMSE++){
+                RMSE += pow((current_correct_class[idx_RMSE]-current_total_class[idx_RMSE] ), 2);
+            }
+            RMSE = sqrt(RMSE/num_labels);
+            num_img++;
+        }
+        else
+            RMSE = 0;
 
-        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
+        avg_RMSE = ((avg_RMSE*(num_img-1)) + RMSE)/(num_img); 
 
-        fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\t", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
-        fprintf(fp2, "\tC0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n",  (float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
+        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100*(float)correct/(float)proposals);
+
+        fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\t", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100*(float)correct/(float)proposals);
+        fprintf(fp2, "RMSE:%.2f avgRMSE:%.2f\tC0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n", RMSE, avg_RMSE ,(float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
         
 
         

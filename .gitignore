@@ -20,6 +20,7 @@ darknet
 *.weights
 backup/
 run.sh
+Log_recall/
 
 # OS Generated #
 .DS_Store*

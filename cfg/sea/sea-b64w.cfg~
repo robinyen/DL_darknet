@@ -17,7 +17,7 @@ hue=.1
 
 learning_rate=0.001
 burn_in=1000
-max_batches = 4401
+max_batches = 6801
 policy=steps
 steps=2000,3000
 scales=.1,.1
