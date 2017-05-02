@@ -746,6 +746,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     clock_t time;
     char buff[256];
     char *input = buff;
+    char *imgpath;
+    char save_img_name[24];
     int j;
     float nms=.4;
     while(1){
@@ -757,6 +759,14 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             input = fgets(input, 256, stdin);
             if(!input) return;
             strtok(input, "\n");
+
+            //r
+            printf("input: %s\n",input);
+            printf("outfile: %s\n", outfile);
+            imgpath = strstr(input, "JPEGImages") + strlen("JPEGImages/");
+            //find_replace(imgpath,'.jpg',)
+            sprintf(save_img_name, "%s_%s", outfile, imgpath);
+            printf("Imgae path:%s \n", save_img_name);
         }
         image im = load_image_color(input,0,0);
         image sized = letterbox_image(im, net.w, net.h);
@@ -778,9 +788,15 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         //else if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
         draw_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
-        if(outfile){
-            save_image(sized, outfile);
+       
+        //if(outfile){
+        //    save_image(sized, outfile);
+        //}
+        if(save_img_name){
+            save_image(sized, save_img_name);
         }
+
+
         else{
             save_image(sized, "predictions");
             show_image(sized, "predictions");
