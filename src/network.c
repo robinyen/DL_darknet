@@ -75,6 +75,13 @@ void reset_momentum(network net)
     #endif
 }
 
+int decrease_amt = 0;
+
+void add_decrease_amt()
+{
+    ++decrease_amt;
+}
+
 float get_current_rate(network net)
 {
     int batch_num = get_current_batch(net);
@@ -83,7 +90,15 @@ float get_current_rate(network net)
     if (batch_num < net.burn_in) return net.learning_rate * pow((float)batch_num / net.burn_in, net.power);
     switch (net.policy) {
         case CONSTANT:
-            return net.learning_rate;
+            rate = net.learning_rate;
+            for(i=0; i<decrease_amt; ++i){
+                rate *= 0.3;
+            }
+            //printf("in CONSTANT\n");
+            //printf("decrease_amt: %d\n", decrease_amt);
+
+            return rate;
+            // return net.learning_rate;
         case STEP:
             return net.learning_rate * pow(net.scale, batch_num/net.step);
         case STEPS:
@@ -255,6 +270,7 @@ float train_network_datum(network net)
 float train_network_sgd(network net, data d, int n)
 {
     int batch = net.batch;
+//printf("bathc%d\n",batch);
 
     int i;
     float sum = 0;
@@ -271,6 +287,8 @@ float train_network(network net, data d)
     assert(d.X.rows % net.batch == 0);
     int batch = net.batch;
     int n = d.X.rows / batch;
+
+//printf("batch: %d, n: %d", batch, n);
 
     int i;
     float sum = 0;
