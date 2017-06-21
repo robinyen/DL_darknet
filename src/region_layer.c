@@ -245,6 +245,7 @@ void forward_region_layer(const layer l, network net)
                 }
             }
         }
+           //2017 0621 test function of region
         for(t = 0; t < 30; ++t){
             box truth = float_to_box(net.truth + t*5 + b*l.truths, 1);
 

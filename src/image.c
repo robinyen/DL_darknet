@@ -221,6 +221,24 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
     }
 }
 
+void draw_large_detections(image im, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes, int *largepic_class_couter)
+{
+    int i;
+
+    for(i = 0; i < num; ++i){
+        int class = max_index(probs[i], classes);
+        float prob = probs[i][class];
+        if(prob > thresh){
+
+            //printf("%d %s: %.0f%%\n", i, names[class], prob*100);
+            printf("%s: %.0f%%\n", names[class], prob*100);
+            largepic_class_couter[class]++;
+        }
+    }
+}
+
+
+
 void transpose_image(image im)
 {
     assert(im.w == im.h);

@@ -638,6 +638,11 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     float avg_RMSE = 0;
     float num_img = 0;
     float RMSE[5] = {0,0,0,0,0};
+    char * pch;
+    int largepic_id;
+    int current_largepic_id = 0;
+    int largepic_class_couter[5] = {0,0,0,0,0};
+
 
     for(i = 0; i < m; ++i){
         char *path = paths[i];
@@ -664,6 +669,25 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
 
         float current_correct_class[5] = {0,0,0,0,0};
         float current_total_class[5] = {0,0,0,0,0};
+/*
+//---------------------Sum of one large picture 
+        
+        pch = strstr(path, "JPEGImages") + strlen("JPEGImages/");
+        pch = strtok(pch,"_");
+        largepic_id = atoi(pch);
+        if(current_largepic_id != largepic_id){
+            current_largepic_id = largepic_id;
+            int tmp_i;
+            for(tmp_i=0; tmp_i<5; ++tmp_i){
+                largepic_class_couter[tmp_i] = 0;
+            }
+        }
+        printf("current pic id : %d\n", largepic_id);
+
+//---------------------
+*/
+
+
 
 
         for (j = 0; j < num_labels; ++j) {
@@ -859,6 +883,136 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     }
 }
 
+void test_large_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile)
+{
+    list *options = read_data_cfg(datacfg);
+    char *name_list = option_find_str(options, "names", "data/names.list");
+    char **names = get_labels(name_list);
+
+    image **alphabet = load_alphabet();
+    network net = parse_network_cfg(cfgfile);
+    if(weightfile){
+        load_weights(&net, weightfile);
+    }
+    set_batch_network(&net, 1);
+    srand(2222222);
+    clock_t time;
+    char buff[256];
+    char *input = buff;
+    char *imgpath;
+    char save_img_name[24];
+    int j;
+    float nms=.4;
+
+/*
+    while(1){
+
+        if(filename){
+            strncpy(input, filename, 256);
+        } else {
+            printf("Enter Image Path: ");
+            fflush(stdout);
+            input = fgets(input, 256, stdin);
+            if(!input) return;
+            strtok(input, "\n");
+
+            //r
+            printf("input: %s\n",input);
+            printf("outfile: %s\n", outfile);
+            imgpath = strstr(input, "JPEGImages") + strlen("JPEGImages/");
+            //find_replace(imgpath,'.jpg',)
+            sprintf(save_img_name, "%s_%s", outfile, imgpath);
+            printf("Imgae path:%s \n", save_img_name);
+        }
+*/
+    list *plist = get_paths("/home/paperspace/Project/yolo/darknet/TestLargeCrop.txt");
+    char **paths = (char **)list_to_array(plist);
+    int m = plist->size;
+    int i = 0;
+    char *pch;
+    int largepic_id = 0;
+    int current_largepic_id = 0;
+    int largepic_class_couter[5] = {0,0,0,0,0};
+    FILE *fp ;
+    fp = fopen("/home/paperspace/Project/yolo/darknet/TestLargeResult.csv", "w");
+    fprintf(fp,"test_id,adult_males,subadult_males,adult_females,juveniles,pups\n");
+
+    for(i = 0; i < m; ++i){
+
+        char *path = paths[i];
+        image im = load_image_color(path,0,0);
+        //image sized = letterbox_image(im, net.w, net.h);
+        image sized = resize_image(im, net.w, net.h);
+        //image sized2 = resize_max(im, net.w);
+        //image sized = crop_image(sized2, -((net.w - sized2.w)/2), -((net.h - sized2.h)/2), net.w, net.h);
+        //resize_network(&net, sized.w, sized.h);
+        layer l = net.layers[net.n-1];
+
+//---------------------Sum of one large picture 
+        
+        pch = strstr(path, "JPEGImages") + strlen("JPEGImages/");
+        pch = strtok(pch,"_");
+        largepic_id = atoi(pch);
+        if(current_largepic_id != largepic_id){
+
+            if(i>0){
+                fprintf(fp,"%d,%d,%d,%d,%d,%d\n", current_largepic_id, largepic_class_couter[0], largepic_class_couter[1], largepic_class_couter[4], largepic_class_couter[3], largepic_class_couter[2]);
+
+            }
+
+            int tmp_i;
+            for(tmp_i=0; tmp_i<5; ++tmp_i){
+                largepic_class_couter[tmp_i] = 0;
+            }
+            current_largepic_id = largepic_id;
+        }
+        printf("current pic id : %d", largepic_id);
+//
+
+
+
+
+        box *boxes = calloc(l.w*l.h*l.n, sizeof(box));
+        float **probs = calloc(l.w*l.h*l.n, sizeof(float *));
+        for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] = calloc(l.classes + 1, sizeof(float *));
+
+        float *X = sized.data;
+        time=clock();
+        network_predict(net, X);
+        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
+        get_region_boxes(l, 1, 1, thresh, probs, boxes, 0, 0, hier_thresh, 0);
+        if (nms) do_nms_obj(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+        //else if (nms) do_nms_sort(boxes, probs, l.w*l.h*l.n, l.classes, nms);
+        //draw_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes);
+        draw_large_detections(sized, l.w*l.h*l.n, thresh, boxes, probs, names, alphabet, l.classes, largepic_class_couter);
+        
+        if(i==m-1) {
+            fprintf(fp,"%d,%d,%d,%d,%d,%d\n", current_largepic_id, largepic_class_couter[0], largepic_class_couter[1], largepic_class_couter[4], largepic_class_couter[3], largepic_class_couter[2]);
+        }
+
+/*
+        if(save_img_name){
+            save_image(sized, save_img_name);
+        }
+
+
+        else{
+            save_image(sized, "predictions");
+            show_image(sized, "predictions");
+
+        }
+*/
+
+        free_image(im);
+        free_image(sized);
+        free(boxes);
+        free_ptrs((void **)probs, l.w*l.h*l.n);
+        if (filename) break;
+    }
+    fclose(fp);
+}
+
+
 void run_detector(int argc, char **argv)
 {
     char *prefix = find_char_arg(argc, argv, "-prefix", 0);
@@ -905,6 +1059,7 @@ void run_detector(int argc, char **argv)
     else if(0==strcmp(argv[2], "valid")) validate_detector(datacfg, cfg, weights, outfile);
     else if(0==strcmp(argv[2], "valid2")) validate_detector_flip(datacfg, cfg, weights, outfile);
     else if(0==strcmp(argv[2], "recall")) validate_detector_recall(cfg, weights, outfile);
+    else if(0==strcmp(argv[2], "testlarge")) test_large_detector(datacfg, cfg, weights, filename, thresh, hier_thresh, outfile);
     else if(0==strcmp(argv[2], "demo")) {
         list *options = read_data_cfg(datacfg);
         int classes = option_find_int(options, "classes", 20);
