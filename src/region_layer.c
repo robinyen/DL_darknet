@@ -245,7 +245,7 @@ void forward_region_layer(const layer l, network net)
                 }
             }
         }
-           //2017 0621 test function of region
+        /*   //2017 0621 test function of region
         for(t = 0; t < 30; ++t){
             box truth = float_to_box(net.truth + t*5 + b*l.truths, 1);
 
@@ -296,7 +296,7 @@ void forward_region_layer(const layer l, network net)
             delta_region_class(l.output, l.delta, class_index, class, l.classes, l.softmax_tree, l.class_scale, l.w*l.h, &avg_cat);
             ++count;
             ++class_count;
-        }
+        } */
     }
     //printf("\n");
     *(l.cost) = pow(mag_array(l.delta, l.outputs * l.batch), 2);
