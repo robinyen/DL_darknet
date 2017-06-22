@@ -1,2 +1,0 @@
-    0     0     0	RPs/Img: 0.00	IOU: -nan%	Recall:-nan%
-    1     0     0	RPs/Img: 0.00	IOU: -nan%	Recall:-nan%

@@ -1,2 +1,0 @@
-    0     0     0	RPs/Img: 0.00	IOU: -nan%	Recall:-nan%		C0: -nan  C1: -nan  C2: -nan  C3: -nan  C4: -nan 
-    1    12    25	RPs/Img: 11.00	IOU: 49.82%	Recall:48.00%		C0: 1.00  C1: -nan  C2: 0.00  C3: 0.50  C4: 0.83 
