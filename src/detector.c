@@ -7,7 +7,6 @@
 #include "demo.h"
 #include "option_list.h"
 #include "blas.h"
-#include <math.h>
 
 
 static int coco_ids[] = {1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,17,18,19,20,21,22,23,24,25,27,28,31,32,33,34,35,36,37,38,39,40,41,42,43,44,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,67,70,72,73,74,75,76,77,78,79,80,81,82,84,85,86,87,88,89,90};
@@ -77,11 +76,6 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
     clock_t time;
     int count = 0;
 
-    int counter_loss = 1;
-    float best_loss = 10000;
-    int decrease_activate = 0; // false
-    int decrease_counter = 0;
-    int best_loss_count = 0;
     //r 
     /*
     FILE *fp_log = fopen('log_training.txt', "w");
@@ -165,8 +159,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
 #ifdef GPU
         if(ngpus == 1){
             //printf("---------1-----GPU\n");
-            //loss = train_network(net, train);
-            loss = train_network_sgd(net, train, 4);
+            loss = train_network(net, train);
         } else {
             loss = train_networks(nets, ngpus, train, 4);
         }
@@ -176,37 +169,11 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
-        // decrease learning rate if not get better avg_loss in certain batch
-        counter_loss++;
-        if(avg_loss < best_loss) {
-            //printf("In 1st loop\n");
-            ++best_loss_count;
-            counter_loss = 1;
-        }
-        if(best_loss_count>0 && (counter_loss%100 == 0)){
-            --best_loss_count;
-        }
-        if(avg_loss < best_loss && best_loss_count>5){
-            best_loss = avg_loss;
-            counter_loss = 1;
-            best_loss_count = 0;
-        }
-
-
-        if(counter_loss>200){
-            //net.policy = EXP;
-            best_loss = avg_loss;
-            counter_loss = 1;
-            add_decrease_amt();
-            //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-            //printf("Counter_Loss > 200: Learning Rate is:%f \n\n", get_current_rate(net));
-        } 
-
         i = get_current_batch(net);
         //printf("%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", get_current_batch(net), loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
-        printf("%d: Loss %f, %f avg, %.8f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
+        printf("%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
         //fprintf(fp_log, "asdf");//"%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
-        printf("best_loss: %f,  best_loss_count: %d, counter_loss: %d\n\n",best_loss, best_loss_count, counter_loss);
+
 /*
 char str[256];  
         sprintf(str, "%d: Loss %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);//,  loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
@@ -228,10 +195,6 @@ char str[256];
             save_weights(net, buff);
         }
         free_data(train);
-        
-        //r
-        if(get_current_rate(net)<0.00000001 && i>999)
-            break;
     }
 #ifdef GPU
     if(ngpus != 1) sync_nets(nets, ngpus, 0);
@@ -617,7 +580,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     int m = plist->size;
     int i=0;
 
-    float thresh = 0.24;//0.24;//.001;
+    float thresh = 0.24;//.001;
     float iou_thresh = .5;
     float nms = .4;
 
@@ -637,12 +600,15 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
     float avg_iou = 0;
     float avg_RMSE = 0;
     float num_img = 0;
+<<<<<<< HEAD
     float RMSE[5] = {0,0,0,0,0};
     char * pch;
     int largepic_id;
     int current_largepic_id = 0;
     int largepic_class_couter[5] = {0,0,0,0,0};
 
+=======
+>>>>>>> parent of 592933c... Project Submission
 
     for(i = 0; i < m; ++i){
         char *path = paths[i];
@@ -761,25 +727,25 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
 
             }
         }
-
+        float RMSE=0;
         int idx_RMSE;
         if(num_labels >0){  
             for(idx_RMSE=0; idx_RMSE<5; idx_RMSE++){
-                RMSE[idx_RMSE] += pow((current_correct_class[idx_RMSE]-current_total_class[idx_RMSE] ), 2);
+                RMSE += pow((current_correct_class[idx_RMSE]-current_total_class[idx_RMSE] ), 2);
             }
-            //RMSE = sqrt(RMSE/num_labels);
-            //num_img++;
+            RMSE = sqrt(RMSE/num_labels);
+            num_img++;
         }
-        //else
-            //RMSE = 0;
+        else
+            RMSE = 0;
 
-        //avg_RMSE = ((avg_RMSE*(num_img-1)) + RMSE)/(num_img); 
+        avg_RMSE = ((avg_RMSE*(num_img-1)) + RMSE)/(num_img); 
 
         fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100*(float)correct/(float)proposals);
 
         fprintf(fp2, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\tPrecision:%.2f%%\t", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total, 100*(float)correct/(float)proposals);
-        fprintf(fp2, "C0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n" ,(float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
-        //fprintf(fp2, "RMSE:%.2f avgRMSE:%.2f\tC0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n", RMSE, avg_RMSE ,(float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
+        fprintf(fp2, "RMSE:%.2f avgRMSE:%.2f\tC0: %.2f  C1: %.2f  C2: %.2f  C3: %.2f  C4: %.2f \n", RMSE, avg_RMSE ,(float)correct_class[0]/total_c0, (float)correct_class[1]/total_c1, (float)correct_class[2]/total_c2, (float)correct_class[3]/total_c3, (float)correct_class[4]/total_c4);
+        
 
         
 
@@ -788,14 +754,7 @@ void validate_detector_recall(char *cfgfile, char *weightfile, char* outfile)
         free_image(orig);
         free_image(sized);
     }
-    int idx_RMSE;
-    for(idx_RMSE=0; idx_RMSE<5; idx_RMSE++){
-        RMSE[idx_RMSE] = sqrt(RMSE[idx_RMSE]/m); 
 
-    }
-    avg_RMSE = (RMSE[0]+RMSE[1]+RMSE[2]+RMSE[3]+RMSE[4])/5.0;
-    fprintf(stderr, "AvgRMSE: %.5f\tRMSE: C0: %.5f  C1: %.5f  C2: %.5f  C3: %.5f  C4: %.5f \n",  avg_RMSE, RMSE[0], RMSE[1], RMSE[2], RMSE[3], RMSE[4]);
-    fprintf(fp2, "AvgRMSE: %.5f\tRMSE: C0: %.5f  C1: %.5f  C2: %.5f  C3: %.5f  C4: %.5f \n",  avg_RMSE, RMSE[0], RMSE[1], RMSE[2], RMSE[3], RMSE[4] );
     fclose(fp2);
 }
 
