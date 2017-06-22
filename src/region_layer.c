@@ -146,7 +146,7 @@ void forward_region_layer(const layer l, network net)
 {
     int i,j,b,t,n;
     memcpy(l.output, net.input, l.outputs*l.batch*sizeof(float));
-
+   // printf("forward_region_layer_outputs:%i\n",l.outputs );
 #ifndef GPU
     for (b = 0; b < l.batch; ++b){
         for(n = 0; n < l.n; ++n){
@@ -163,7 +163,7 @@ void forward_region_layer(const layer l, network net)
             int group_size = l.softmax_tree->group_size[i];
             softmax_cpu(net.input + count, group_size, l.batch, l.inputs, l.n*l.w*l.h, 1, l.n*l.w*l.h, l.temperature, l.output + count);
             count += group_size;
-        }
+        }   
     } else if (l.softmax){
         int index = entry_index(l, 0, 0, 5);
         softmax_cpu(net.input + index, l.classes, l.batch*l.n, l.inputs/l.n, l.w*l.h, 1, l.w*l.h, 1, l.output + index);
@@ -344,9 +344,12 @@ void get_region_boxes(layer l, int w, int h, float thresh, float **probs, box *b
         }
     }
     for (i = 0; i < l.w*l.h; ++i){
+        //printf("region_w*l: %i", l.w*l.h);
         int row = i / l.w;
         int col = i % l.w;
         for(n = 0; n < l.n; ++n){
+            //printf("region_n: %i",l.n);
+            //printf("region_classes: %i", l.classes);
             int index = n*l.w*l.h + i;
             for(j = 0; j < l.classes; ++j){
                 probs[index][j] = 0;

@@ -1,6 +1,7 @@
 
 
-./darknet detector recall cfg/sea/b64w.data  cfg/sea/b64w.cfg backup/b64w_16000.weights -out log_rec_b64w_16000.txt
+./darknet detector recall cfg/sea/b64w.data  cfg/sea/b64w.cfg backup/b64w_27600.weights -out log_rec_b64w_27600.txt
+
 ./darknet detector recall cfg/sea/b64w.data  cfg/sea/b64w.cfg backup/b64w_13600.weights -out log_rec_b64w_13600.txt
 
 ./darknet detector recall cfg/sea/b64w.data  cfg/sea/all-b64w.cfg backup/all-b64w_16000.weights -out log_rec_all-b64w_16000.txt

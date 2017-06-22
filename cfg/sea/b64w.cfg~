@@ -17,10 +17,12 @@ hue=.0
 
 learning_rate=0.001
 burn_in=1000
-max_batches = 20001
+max_batches = 40001
 policy=steps
-steps=2000,10000,16800
-scales=1,.1,.5
+#steps=3200,10000,16800
+#scales=.1,.1,.5
+steps=3200,10000,44800
+scales=.1,.1,.5
 
 [convolutional]
 batch_normalize=1

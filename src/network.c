@@ -188,6 +188,7 @@ void forward_network(network net)
 {
     int i;
     for(i = 0; i < net.n; ++i){
+        //printf("forward_network i: %i\n", i);
         net.index = i;
         layer l = net.layers[i];
         if(l.delta){
