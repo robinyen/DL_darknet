@@ -23,7 +23,7 @@
 #./darknet detector train cfg/sea/b64b.data  cfg/sea/b64b-tune.cfg
 
 #./darknet detector train cfg/sea/b64w.data  cfg/sea/b64w-tune-scratch.cfg
-
+./darknet detector train cfg/sea/b64w.data  cfg/sea/b64w-loss.cfg
 
 #./darknet detector train cfg/sea/r-b64w.data  cfg/sea/r-b64w.cfg
 ./darknet detector train cfg/sea/r-b64w.data  cfg/sea/r-b64w-tune.cfg backup/r-b64w_16000.weights
